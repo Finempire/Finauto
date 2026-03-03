@@ -1,0 +1,24 @@
+# Flask Backend
+flask
+flask-sqlalchemy
+flask-login
+python-dotenv
+
+# Data
+pandas
+openpyxl
+sqlalchemy
+
+# Security
+bcrypt
+
+# AI / ML
+sentence-transformers
+torch
+
+# HTTP / Tally Communication
+requests
+
+# Payment
+razorpay
+
