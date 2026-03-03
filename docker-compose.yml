@@ -17,8 +17,10 @@ services:
       - ./uploads:/app/uploads
 
   frontend:
-    build: 
+    build:
       context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=http://172.105.53.187:5000/api
     ports:
       - "3000:3000"
     environment:
