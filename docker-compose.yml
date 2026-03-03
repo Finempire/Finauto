@@ -11,7 +11,7 @@ services:
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
       - SEED_DEFAULT_ADMIN=true
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=http://172.105.53.187:3000
     volumes:
       - ./data:/app/data
       - ./uploads:/app/uploads
@@ -22,6 +22,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:5000/api
+      - NEXT_PUBLIC_API_URL=http://172.105.53.187:5000/api
     depends_on:
       - backend
