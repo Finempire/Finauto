@@ -22,15 +22,9 @@ async def seed_admin():
     async with async_session() as session:
         result = await session.execute(select(User).where(User.role == "admin"))
         if not result.scalar_one_or_none():
-            print(f"DEBUG: ADMIN_PASSWORD type={type(settings.ADMIN_PASSWORD)} len={len(settings.ADMIN_PASSWORD)} repr={repr(settings.ADMIN_PASSWORD)}")
-            try:
-                hashed_pw = pwd_context.hash(settings.ADMIN_PASSWORD)
-            except Exception as e:
-                print(f"DEBUG: Hashing failed: {e}")
-                raise
             admin = User(
                 email=settings.ADMIN_EMAIL,
-                hashed_pw=hashed_pw,
+                hashed_pw=pwd_context.hash(settings.ADMIN_PASSWORD),
                 full_name="Admin",
                 role="admin",
             )
