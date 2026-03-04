@@ -1,17 +1,21 @@
 # Python
-*.pyc
-*.pyo
-*.pyd
 __pycache__/
-venv/
-env/
+*.py[cod]
 *.egg-info/
 dist/
 build/
+venv/
+.venv/
+*.egg
 
 # Node
-frontend/node_modules/
-frontend/.next/
+node_modules/
+frontend/dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
 
 # IDE
 .vscode/
@@ -23,15 +27,13 @@ frontend/.next/
 .DS_Store
 Thumbs.db
 
-# Database
-data/*.db
-instance/
+# Docker
+*.log
 
-# Environment
-.env
+# Alembic
+backend/alembic/versions/__pycache__/
 
-# Uploads
-uploads/
-
-# Test cache
-.pytest_cache/
+# Data
+*.db
+*.sqlite3
+pgdata/

@@ -1,21 +1,39 @@
-# Antigravity Tally Automation
+# FinAuto v2.0
 
-A robust, production-grade web application tailored for accounting and finance users. Upload Excel/CSV files, map narrations to Tally ledgers using AI, and generate direct Tally-compatible XML imports.
+**Tally ERP Automation Platform** — Upload Excel, Push to Tally.
 
-## Features
-- **Modern User Interface (React / Next.js)**: Sleek Ant Design layout with dashboards, stepper-based wizards, and real-time mapping tables.
-- **AI-Powered Ledger Mapping**: Automatically suggests Chart of Accounts mappings based on transaction history and fuzzy text string matching.
-- **Direct Tally Integration**: Exports format-perfect XML or pushes vouchers directly to a local/remote Tally Prime server.
-- **Robust Validation**: Enforces strict Pandas dataframe checks before XML conversion.
+## Architecture
 
-## Tech Stack
-- **Frontend**: Next.js (App Router), React, Ant Design, Tailwind CSS.
-- **Backend**: Flask (Python), Pandas (Data processing), SQLAlchemy (SQLite by default).
-- **Deployment**: Docker & Docker Compose.
+- **Backend**: FastAPI (Python 3.11), SQLAlchemy 2.0, PostgreSQL
+- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS
+- **Infrastructure**: Docker Compose (nginx + backend + postgres)
+- **Auth**: JWT (8-hour tokens)
 
-## Structure
-- `/frontend`: Next.js React application.
-- `/backend`: Flask python API logic, SQLite DB models, and Tally generation services.
+## Quick Start (Local Dev)
 
-## Setup & Deployment
-Please refer to [DEPLOY.md](DEPLOY.md) for full deployment commands using Docker, including instructions on setting environment variables from `.env.example`.
+```bash
+# Backend
+cd backend
+python -m venv venv && venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+# Frontend
+cd frontend
+npm install && npm run dev
+```
+
+## Deploy to Linode
+
+```bash
+ssh root@your-linode-ip
+git clone https://github.com/Finempire/Finauto.git /app && cd /app
+cp .env.example .env  # edit with real secrets
+cd frontend && npm install && npm run build && cd ..
+docker compose up -d
+```
+
+## Default Admin
+
+- Email: `admin@finauto.com`
+- Password: set via `ADMIN_PASSWORD` in `.env`
