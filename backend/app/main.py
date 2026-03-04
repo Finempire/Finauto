@@ -14,7 +14,7 @@ from app.api.v1.upload import router as upload_router
 from app.api.v1.tally import router as tally_router
 from app.api.v1.templates import router as templates_router
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 async def seed_admin():

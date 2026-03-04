@@ -11,7 +11,7 @@ from app.models.user import User
 from app.schemas import UserOut, UserCreate, UserUpdate
 
 router = APIRouter(prefix="/api/admin/users", tags=["admin"])
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 @router.get("/", response_model=list[UserOut])
