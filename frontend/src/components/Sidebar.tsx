@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import type { User } from '@/types';
-import { Upload, Settings, FileText, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, Upload, Settings, FileText, Users, LogOut } from 'lucide-react';
 
 interface Props {
     user: User;
@@ -8,7 +8,8 @@ interface Props {
 }
 
 const links = [
-    { to: '/', icon: Upload, label: 'Upload' },
+    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/upload', icon: Upload, label: 'Upload Wizard' },
     { to: '/settings', icon: Settings, label: 'Tally Settings' },
     { to: '/templates', icon: FileText, label: 'Templates' },
 ];

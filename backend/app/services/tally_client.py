@@ -96,14 +96,12 @@ async def push_vouchers(
             try:
                 xml_str = build_voucher_xml(voucher_type, mapped_row, config.company_name or "")
             except Exception as e:
-                if skip_errors:
-                    fail_count += 1
-                    yield {"row": i, "status": "failed", "error": f"XML build error: {str(e)}"}
-                    continue
-                else:
-                    fail_count += 1
-                    yield {"row": i, "status": "failed", "error": f"XML build error: {str(e)}"}
-                    continue
+                fail_count += 1
+                yield {"row": i, "status": "failed", "error": f"XML build error: {str(e)}"}
+                if not skip_errors:
+                    yield {"done": True, "success": success_count, "failed": fail_count}
+                    return
+                continue
 
             # Push to Tally
             ok, message = await _push_single_voucher(client, xml_str, config.host, config.port)
@@ -113,5 +111,8 @@ async def push_vouchers(
             else:
                 fail_count += 1
                 yield {"row": i, "status": "failed", "error": message}
+                if not skip_errors:
+                    yield {"done": True, "success": success_count, "failed": fail_count}
+                    return
 
     yield {"done": True, "success": success_count, "failed": fail_count}

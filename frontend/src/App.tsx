@@ -4,6 +4,7 @@ import { getMe } from '@/api/client';
 import type { User } from '@/types';
 import Sidebar from '@/components/Sidebar';
 import Login from '@/pages/Login';
+import Dashboard from '@/pages/Dashboard';
 import UploadWizard from '@/pages/UploadWizard';
 import Settings from '@/pages/Settings';
 import Templates from '@/pages/Templates';
@@ -39,7 +40,8 @@ export default function App() {
             <Sidebar user={user} onLogout={() => { localStorage.removeItem('token'); setUser(null); }} />
             <main className="flex-1 overflow-auto p-6">
                 <Routes>
-                    <Route path="/" element={<UploadWizard />} />
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/upload" element={<UploadWizard />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/templates" element={<Templates />} />
                     <Route path="/admin/users" element={user.role === 'admin' ? <Users /> : <Navigate to="/" />} />
