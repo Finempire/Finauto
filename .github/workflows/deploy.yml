@@ -1,0 +1,114 @@
+name: CI / Deploy to Linode
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:          # allow manual trigger from GitHub UI
+
+# Cancel in-progress runs on the same branch to avoid stale deploys
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  DEPLOY_PATH: /opt/finauto   # path on Linode where the repo lives
+  SSH_PORT: ${{ secrets.LINODE_PORT || '22' }}
+
+# ─────────────────────────────────────────────
+# JOB 1 — CI: lint + type-check + build frontend
+# ─────────────────────────────────────────────
+jobs:
+  ci:
+    name: Build & Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: TypeScript check + Vite build
+        working-directory: frontend
+        run: npm run build         # runs: tsc -b && vite build
+
+      # Upload the built dist/ so the deploy job can use it
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 1        # ephemeral — only needed for this run
+
+# ─────────────────────────────────────────────
+# JOB 2 — Deploy (only on push to main/master, never on PRs)
+# ─────────────────────────────────────────────
+  deploy:
+    name: Deploy to Linode
+    runs-on: ubuntu-latest
+    needs: ci                      # only deploy if CI passes
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+
+      # ── Copy built frontend to server ──────────────────────────────────
+      - name: Copy frontend dist to Linode
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_USER }}
+          key: ${{ secrets.LINODE_SSH_KEY }}
+          port: ${{ env.SSH_PORT }}
+          source: "frontend/dist/"
+          target: ${{ env.DEPLOY_PATH }}
+          strip_components: 0
+
+      # ── Pull latest code & restart containers ──────────────────────────
+      - name: Deploy on Linode via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_USER }}
+          key: ${{ secrets.LINODE_SSH_KEY }}
+          port: ${{ env.SSH_PORT }}
+          script: |
+            set -e
+            cd ${{ env.DEPLOY_PATH }}
+
+            echo "==> Pulling latest code..."
+            git fetch origin
+            git reset --hard origin/${{ github.ref_name }}
+
+            echo "==> Rebuilding & restarting containers..."
+            docker compose pull postgres          # always grab latest patch
+            docker compose up -d --build backend  # rebuild Python image
+            docker compose restart nginx          # pick up new frontend dist
+
+            echo "==> Waiting for containers to be healthy..."
+            sleep 5
+            docker compose ps
+
+            echo "==> Pruning unused Docker images..."
+            docker image prune -f
+
+            echo "==> Deploy complete ✓"
