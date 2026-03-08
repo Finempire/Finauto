@@ -22,7 +22,8 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: always
 
   postgres:
@@ -33,6 +34,12 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finauto -d finauto"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     restart: always
 
 volumes:
